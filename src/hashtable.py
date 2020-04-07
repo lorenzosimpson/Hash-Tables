@@ -131,7 +131,6 @@ class HashTable:
                     self.insert(pair.key, pair.value)
                     pair = pair.next
 
-        self.storage = new_storage
         
 
 
