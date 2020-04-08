@@ -6,6 +6,8 @@ class LinkedPair:
         self.key = key
         self.value = value
         self.next = None
+    def __repr__(self):
+        return f'{self.key}: {self.value}'
 
 class HashTable:
     '''
@@ -15,6 +17,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
+        self.size = len(self.storage)
 
 
     def _hash(self, key):
@@ -32,7 +35,10 @@ class HashTable:
 
         OPTIONAL STRETCH: Research and implement DJB2
         '''
-        pass
+        hash = 5381
+        for char in key:
+            hash = (hash * 33) + ord(char)
+        return hash % self.capacity
 
 
     def _hash_mod(self, key):
@@ -51,8 +57,15 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        i = self._hash_djb2(key)
 
+        if self.storage[i] is not None:
+            # collision
+            new_pair = LinkedPair(key, value)
+            new_pair.next = self.storage[i]
+            self.storage[i] = new_pair
+        else:
+            self.storage[i] = LinkedPair(key, value)
 
 
     def remove(self, key):
@@ -63,7 +76,21 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        i = self._hash_djb2(key)
+        pair = self.storage[i]
+
+        if pair == None:
+            print('Warning: key not found')
+
+        while pair.key is not key:
+            pair = pair.next
+
+        if pair.value == None:
+            return None
+        else:
+            pair.value = None
+
+        return None
 
 
     def retrieve(self, key):
@@ -74,7 +101,17 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        i = self._hash_djb2(key)
+        pair = self.storage[i]
+
+        while pair is not None:
+            if pair.key == key:
+                return pair.value
+            pair = pair.next
+        
+        return None
+
+
 
 
     def resize(self):
@@ -84,8 +121,20 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        self.capacity *= 2
+        old_storage = self.storage
+        new_storage = [None] * self.capacity
+        self.storage = new_storage
+        
+        for i in range(len(old_storage)):
+            if old_storage[i] is not None:
+                pair = old_storage[i]
+                # if there's already a linked list chain at this location
+                while pair is not None:
+                    self.insert(pair.key, pair.value)
+                    pair = pair.next
 
+        
 
 
 if __name__ == "__main__":
@@ -113,5 +162,6 @@ if __name__ == "__main__":
     print(ht.retrieve("line_1"))
     print(ht.retrieve("line_2"))
     print(ht.retrieve("line_3"))
+
 
     print("")
